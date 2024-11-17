@@ -6,9 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlagiTrack</title>
     <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+    <link rel="icon" href="{{url_for('static', filename='images/Loading.png')}}" type="image/x-icon">
 </head>
-<body>
-    <h1 class="text-blue-600">Hello, PlagiTrack!</h1>
+<body class="flex items-center justify-center min-h-screen">
+    <section class="max-w-6xl mx-auto border-2 shadow-xl shadow-gray-700"> 
+        <div class ="grid grid-cols-1 md:grid-cols-2 p-10">
+            <div class =>
+                <h2 class="text-center font-bold text-light-blue text-5xl p-2"> Welcome </h2>
+                <form class="max-w-sm mx-auto mt-10">
+                    <div class="mb-5">
+                    <label for="username" class="block mb-2 text-md font-semibold text-deep-blue ">Username</label>
+                    <input type="username" id="username" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-deep-blue text-sm rounded-lg block w-full p-2.5" placeholder="daskom123" required />
+                    </div>
+                    <div class="mb-5">
+                    <label for="password" class="block mb-2 text-md font-semibold text-deep-blue ">Password</label>
+                    <input type="password" id="password" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-deep-blue text-sm rounded-lg block w-full p-2.5" placeholder="********" required />
+                    </div>
+                    
+                    <button type="submit" class="text-white bg-gradient-to-r from-deep-blue to-light-blue focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center mt-6">LOGIN</button>
+                </form>
+            </div>
+            
+            <div class="p-5 flex flex-col items-center justify-center gap-3">
+                <img src="/static/images/Logo.png" alt="Image 1" class="w-[300px]">
+                <img src="/static/images/Icon Landing Page.png" alt="Image 2" class="w-[450px]">
+            </div>
+            
+        </div>    
+    </section>
 
 
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
