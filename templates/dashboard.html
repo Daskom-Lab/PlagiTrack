@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlagiTrack</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
+    <link rel="icon" href="{{url_for('static', filename='images/Loading.png')}}" type="image/x-icon">
+</head>
+<body >
+    <nav class="bg-white border-gray-200 shadow-md shadow-gray-600">
+        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+            <a href="/dashboard" class="flex items-center space-x-3 rtl:space-x-reverse">
+                <img src="/static/images/Logo.png" alt="Image 1" class="h-7">
+            </a>
+            <div class="flex items-center md:order-2 space-x-1 md:space-x-0 rtl:space-x-reverse">
+                <button type="button" data-dropdown-toggle="language-dropdown-menu" class="inline-flex items-center font-medium justify-center px-4 py-2 text-sm text-gray-900 dark:text-white rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <!-- Ganti SVG dengan tag <img> -->
+                    <img 
+                        src="/static/images/Loading.png" 
+                        alt="Profile Picture" 
+                        class="w-8 h-8 rounded-full me-3"
+                    />
+                   <h4 class="text-lg text-deep-blue font-semibold"> BOT (Stevani)</h4> 
+                </button>
+            </div>
+        </div>
+    </nav>
+  
+    <!-- Section Container -->
+    <section class="max-w-6xl mx-auto p-8">
+        <!-- Judul -->
+        <h1 class="text-center text-3xl font-bold text-deep-blue mt-6 mb-8">Upload Your File To Check Similarity</h1>
+
+        <!-- Input Judul -->
+        <input type="text" id="judul" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-[400px] p-2.5 mb-10 mx-auto block text-center" placeholder="Judul Tugas Besar" required />
+
+        <!-- Grid Upload Boxes -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Card 1 -->
+            <div class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
+                <form class="w-full">
+                    <!-- Kelas Input Field -->
+                    <div class="mb-4 w-full">
+                        <input type="text" id="kelas1" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-40 p-2.5 mb-10 mx-auto block text-center" placeholder="Kelompok" required />
+                    </div>
+
+                    <!-- Image Display -->
+                    <img src="/static/images/File.png" alt="Image 1" class="h-14 mb-4 mx-auto">
+
+                    <!-- File Upload Section -->
+                    <label for="file-upload-1" class="text-teal-600 font-semibold cursor-pointer">
+                        <input type="file" id="file-upload-1" class="hidden" onchange="displayFileName()" />
+                        Upload File
+                    </label>
+                    
+                    <!-- Display File Name -->
+                    <div id="file-name-1" class="mt-2 text-gray-500"></div>
+                </form>
+            </div>
+
+           <!-- Card 2 -->
+            <div class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
+                <form class="w-full">
+                    <!-- Kelas Input Field -->
+                    <div class="mb-4 w-full">
+                        <input type="text" id="kelas2" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-40 p-2.5 mb-10 mx-auto block text-center" placeholder="Kelompok" required />
+                    </div>
+
+                    <!-- Image Display -->
+                    <img src="/static/images/File.png" alt="Image 1" class="h-14 mb-4 mx-auto">
+
+                    <!-- File Upload Section -->
+                    <label for="file-upload-2" class="text-teal-600 font-semibold cursor-pointer">
+                        <input type="file" id="file-upload-2" class="hidden" onchange="displayFileName()" />
+                        Upload File
+                    </label>
+                    
+                    <!-- Display File Name -->
+                    <div id="file-name-2" class="mt-2 text-gray-500"></div>
+                </form>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
+                <form class="w-full">
+                    <!-- Kelas Input Field -->
+                    <div class="mb-4 w-full">
+                        <input type="text" id="kelas3" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-40 p-2.5 mb-10 mx-auto block text-center" placeholder="Kelompok" required />
+                    </div>
+
+                    <!-- Image Display -->
+                    <img src="/static/images/File.png" alt="Image 1" class="h-14 mb-4 mx-auto">
+
+                    <!-- File Upload Section -->
+                    <label for="file-upload-3" class="text-teal-600 font-semibold cursor-pointer">
+                        <input type="file" id="file-upload-3" class="hidden" onchange="displayFileName()" />
+                        Upload File
+                    </label>
+                    
+                    <!-- Display File Name -->
+                    <div id="file-name-3" class="mt-2 text-gray-500"></div>
+                </form>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
+                <form class="w-full">
+                    <!-- Kelas Input Field -->
+                    <div class="mb-4 w-full">
+                        <input type="text" id="kelas4" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-40 p-2.5 mb-10 mx-auto block text-center" placeholder="Kelompok" required />
+                    </div>
+
+                    <!-- Image Display -->
+                    <img src="/static/images/File.png" alt="Image 1" class="h-14 mb-4 mx-auto">
+
+                    <!-- File Upload Section -->
+                    <label for="file-upload-4" class="text-teal-600 font-semibold cursor-pointer">
+                        <input type="file" id="file-upload-4" class="hidden" onchange="displayFileName()" />
+                        Upload File
+                    </label>
+                    
+                    <!-- Display File Name -->
+                    <div id="file-name-4" class="mt-2 text-gray-500"></div>
+                </form>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
+                <form class="w-full">
+                    <!-- Kelas Input Field -->
+                    <div class="mb-4 w-full">
+                        <input type="text" id="kelas1" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-40 p-2.5 mb-10 mx-auto block text-center" placeholder="Kelompok" required />
+                    </div>
+
+                    <!-- Image Display -->
+                    <img src="/static/images/File.png" alt="Image 1" class="h-14 mb-4 mx-auto">
+
+                    <!-- File Upload Section -->
+                    <label for="file-upload-5" class="text-teal-600 font-semibold cursor-pointer">
+                        <input type="file" id="file-upload-5" class="hidden" onchange="displayFileName()" />
+                        Upload File
+                    </label>
+                    
+                    <!-- Display File Name -->
+                    <div id="file-name-5" class="mt-2 text-gray-500"></div>
+                </form>
+            </div>
+
+           <!-- Card 6 -->
+            <div class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
+                <form class="w-full">
+                    <!-- Kelas Input Field -->
+                    <div class="mb-4 w-full">
+                        <input type="text" id="kelas2" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-40 p-2.5 mb-10 mx-auto block text-center" placeholder="Kelompok" required />
+                    </div>
+
+                    <!-- Image Display -->
+                    <img src="/static/images/File.png" alt="Image 1" class="h-14 mb-4 mx-auto">
+
+                    <!-- File Upload Section -->
+                    <label for="file-upload-6" class="text-teal-600 font-semibold cursor-pointer">
+                        <input type="file" id="file-upload-6" class="hidden" onchange="displayFileName()" />
+                        Upload File
+                    </label>
+                    
+                    <!-- Display File Name -->
+                    <div id="file-name-6" class="mt-2 text-gray-500"></div>
+                </form>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
+                <form class="w-full">
+                    <!-- Kelas Input Field -->
+                    <div class="mb-4 w-full">
+                        <input type="text" id="kelas3" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-40 p-2.5 mb-10 mx-auto block text-center" placeholder="Kelompok" required />
+                    </div>
+
+                    <!-- Image Display -->
+                    <img src="/static/images/File.png" alt="Image 1" class="h-14 mb-4 mx-auto">
+
+                    <!-- File Upload Section -->
+                    <label for="file-upload-7" class="text-teal-600 font-semibold cursor-pointer">
+                        <input type="file" id="file-upload-7" class="hidden" onchange="displayFileName()" />
+                        Upload File
+                    </label>
+                    
+                    <!-- Display File Name -->
+                    <div id="file-name-7" class="mt-2 text-gray-500"></div>
+                </form>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
+                <form class="w-full">
+                    <!-- Kelas Input Field -->
+                    <div class="mb-4 w-full">
+                        <input type="text" id="kelas4" class="bg-gray-50 border border-gray-300 shadow-md shadow-gray-500 text-gray-900 text-sm rounded-lg w-40 p-2.5 mb-10 mx-auto block text-center" placeholder="Kelompok" required />
+                    </div>
+
+                    <!-- Image Display -->
+                    <img src="/static/images/File.png" alt="Image 1" class="h-14 mb-4 mx-auto">
+
+                    <!-- File Upload Section -->
+                    <label for="file-upload-8" class="text-teal-600 font-semibold cursor-pointer">
+                        <input type="file" id="file-upload-8" class="hidden" onchange="displayFileName()" />
+                        Upload File
+                    </label>
+                    
+                    <!-- Display File Name -->
+                    <div id="file-name-8" class="mt-2 text-gray-500"></div>
+                </form>
+            </div>
+            <div class="mt-1 text-md font-semibold text-red-600" >Accepted file types : .c document</div>
+
+            <!-- Centered 'COMPARE' Button -->
+            <div class="col-span-1 md:col-span-4 flex justify-center mt-4">
+                <button type="submit" class="text-white bg-gradient-to-r from-deep-blue to-light-blue focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm w-40 px-5 py-2.5 text-center">
+                    COMPARE
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script src="/static/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+</body>
+</html>
