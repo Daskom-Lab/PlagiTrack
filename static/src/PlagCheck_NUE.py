@@ -1,3 +1,4 @@
+from os import system
 from thefuzz import fuzz as tf
 from rapidfuzz import fuzz as rf
 
@@ -64,38 +65,37 @@ CItems: dict[str, list[str]] = {
     ],
 }
 
-CandidatesCItems: str = "candidates_c_items.txt"
-CandidatesPlagiarismResults: str = "candidates_plagiarism_results.txt"
+# Declaring two outputs inside a file for better tracking
+# Required seperate folder to output the results separately, inside `./caches`
+system("mkdir caches")
+CandidatesCItems: str = "./caches/candidates_c_items.txt"
+CandidatesPlagiarismResults: str = "./caches/candidates_plagiarism_results.txt"
 
 # List of available programs, use accordingly to the total amount of code programs
 # you have on your PC, or some sort... It can be up to whatever amount you wanted to!
 # In order to add a code program here, just copy and paste the file path...
 Programs: list[str] = [
-    "./a.c",
-    "./b.c",
-    "./c.c",
-    "./d.c",
-    "./e.c",
-    "./f.c",
-    "./g.c",
-    "./h.c"
+    # Insert a file path/file name
+    # Insert a file path/file name
+    # Insert a file path/file name
+    # etc...
 ]
 
 # --------------------------------------------------
 # ---------- IMPORTANT KEYS OF ALGORITHMS ----------
 # --------------------------------------------------
-# Value for `transformation_factor`
-# 
-# 0 < transformation_factor <= 1: Compression factor, diluting the 40-50% and maintains for higher percentages.
-# transformation_factor > 1:      Expansion factor, creating a higher amount of percentage values.
-# transformation_factor <= 0:     Inverts the percentage values, NOT SUITABLE!
-# Recommended ranges: 0.75 up to 0.9
-transformation_factor: float = 0.8
+key_configs: list[str] = []
+transformation_factor: float = 0.0
+least_plagiarism: float = 0.0
 
-# Value for `least_plagiarism`
-# 
-# Recommeded value: 30.00%
-least_plagiarism: float = 30.0
+try:
+    with open("../../CONFIGURATIONS.cfg", "r", encoding = "utf-8") as f: key_configs.append(f.readlines())
+except FileNotFoundError:
+    with open("./CONFIGURATIONS.cfg", "r", encoding = "utf-8") as f: key_configs.append(f.readlines())
+
+for i in key_configs:
+    if "TRANSFORMATION_FACTOR" in i: transformation_factor = float(i.partition("=")[-1].strip())
+    if "LEAST_PLAGIARISM" in i: least_plagiarism = float(i.partition("=")[-1].strip())
 # --------------------------------------------------
 # ---------- IMPORTANT KEYS OF ALGORITHMS ----------
 # --------------------------------------------------
@@ -328,6 +328,10 @@ for item in range(TotalCodePrograms):
 
 print("Done!")
 
+# --------------------------------------------------
+# --------------------------------------------------
+# --------------------------------------------------
+ 
 print()
 print(f"=== Plagiarism Check ===")
 print(f"Topic: ???")
