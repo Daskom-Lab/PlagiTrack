@@ -1,0 +1,36 @@
+# Ignore the uploads directory
+uploads/
+
+# Ignore node_modules directory
+node_modules/
+
+# Ignore pnpm lock file
+pnpm-lock.yaml
+
+# Ignore Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environment directories
+venv/
+ENV/
+env/
+.venv/
+
+# Ignore JavaScript build directories and files
+dist/
+build/
+*.log
+
+# Ignore coverage reports
+coverage/
+*.cover
+*.coverage
+*.cov
+*.lcov
+
+# Ignore environment variable files
+.env
+.env.*
