@@ -1,3 +1,6 @@
 thefuzz
 rapidfuzz
 copydetect
+flask
+eventlet
+flask-socketio
