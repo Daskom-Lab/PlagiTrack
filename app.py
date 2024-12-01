@@ -71,65 +71,6 @@ async def handle_similarity(request):
     )
     return web.json_response(result)
 
-
-# async def handle_compare(request):
-#     """
-#     Handles the POST request to compare two programs.
-#     """
-#     try:
-#         pdf_path = 'static'+'/result.pdf'
-#         html_path = 'static'+'/result.html'
-    
-#         if os.path.exists(pdf_path):
-#             os.remove(pdf_path)
-#         if os.path.exists(html_path):
-#             os.remove(html_path)
-#         os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-        
-#         # Parse the incoming JSON payload
-#         data = await request.json()
-#         program1 = data.get("program1")
-#         program2 = data.get("program2")
-
-#         # Validate input
-#         if not program1 or not program2:
-#             return web.json_response({"error": "Both program1 and program2 are required"}, status=400)
-
-#         # Remove any existing .c files in the OUTPUT_FOLDER
-#         for file in glob(OUTPUT_FOLDER + '/*.c'):
-#             os.remove(file)
-
-#         program1_path = UPLOAD_FOLDER+'/'+program1
-#         program2_path = UPLOAD_FOLDER+'/'+program2
-#         shutil.copy(program1_path, OUTPUT_FOLDER)
-#         shutil.copy(program2_path, OUTPUT_FOLDER)
-
-#         detector = CopyDetector(test_dirs=[OUTPUT_FOLDER], extensions=['c'], out_file=html_path, autoopen=False)
-        
-#         # loop = asyncio.get_event_loop()
-#         # await loop.run_in_executor(executor, detector.run)
-        
-#         detector.run()
-#         detector.generate_html_report()
-
-#         # Remove any existing .c files in the OUTPUT_FOLDER
-#         for file in glob(OUTPUT_FOLDER + '/*.c'):
-#             os.remove(file)
-#         if os.path.exists(pdf_path):
-#             os.remove(pdf_path)
-#         # if os.path.exists(html_path):
-#         #     os.remove(html_path)
-        
-#         pdfkit.from_file(html_path, pdf_path)
-
-#         return web.FileResponse(pdf_path, headers={
-#             "Content-Disposition": f'attachment; filename="{os.path.basename(pdf_path)}"'
-#         })
-
-
-#     except Exception as e:
-#         return web.json_response({"error": f"An error occurred: {str(e)}"}, status=500)
-
 async def handle_compare(request):
     """
     Handles the POST request to compare two programs.
