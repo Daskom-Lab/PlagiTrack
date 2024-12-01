@@ -9,6 +9,7 @@ from glob import glob
 from core import allowed_file, process_ai_detection, process_similarity, UPLOAD_FOLDER, STATIC_FOLDER, OUTPUT_FOLDER
 from copydetect import CopyDetector
 import pdfkit
+import re
 
 # Route Handlers
 @aiohttp_jinja2.template('index.html')
@@ -109,22 +110,31 @@ async def handle_compare(request):
         # Use an executor for blocking operations
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, detector.run)
+
+        # TODO custom generate html report so it works with pdfkit
         await loop.run_in_executor(None, detector.generate_html_report)
 
-        # Clean up the folder
-        for file in glob(OUTPUT_FOLDER + '/*.c'):
-            os.remove(file)
+        shutil.rmtree(OUTPUT_FOLDER)
 
         # Generate the PDF
+        with open(html_path, 'r') as file:
+            html_content = file.read()
+
+        # Replace "collapse" with ""
+        html_content = html_content.replace("collapse", "")
+
+        # Remove all button tags
+        html_content = re.sub(r'<button.*?>.*?</button>', '', html_content, flags=re.DOTALL)
+
+        with open(html_path, 'w') as file:
+            file.write(html_content)
         await loop.run_in_executor(None, lambda: pdfkit.from_file(html_path, pdf_path))
-        print('YO')
+
         # Return the PDF as a response
         return web.json_response({"message": "Comparison completed successfully"}, status=200)
 
     except Exception as e:
         return web.json_response({"error": f"An error occurred: {str(e)}"}, status=500)
-
-
 
 
 # Setup Routes Function
