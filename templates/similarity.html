@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plagiarism Detector</title>
+    <link rel="stylesheet" href="/static/dist/css/output.css" />
+    <link rel="icon" href="/static/images/Loading.png" type="image/x-icon" />
+    <style>
+        .loading-screen {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loading-screen.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .results-container {
+            max-height: 80%;
+            /* Limit the height of the results area */
+            overflow-y: auto;
+            /* Add vertical scrolling if needed */
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex flex-col items-center h-screen">
+    <!-- Loading Screen -->
+    <div class="loading-screen fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center"
+        id="loadingScreen">
+        <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500 border-opacity-70"></div>
+        <p class="mt-4 text-gray-700 text-lg font-medium">
+            Processing, please wait...
+        </p>
+        <p id="elapsedTime" class="mt-2 text-gray-500 text-sm">
+            Time elapsed: 0 seconds
+        </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto h-4/5 bg-white shadow-lg rounded-lg p-6">
+        <div class="mb-4 flex items-center">
+            <label for="slider" class="text-gray-700 mr-4">Threshold ≥</label>
+            <input type="range" id="slider" min="1" max="100" value="70" class="w-full" />
+            <span id="sliderValue" class="ml-4 text-gray-800 font-bold">70%</span>
+        </div>
+        <div class="results-container" id="results"></div>
+    </div>
+
+    <script>
+        const resultsDiv = document.getElementById("results");
+        const loadingScreen = document.getElementById("loadingScreen");
+        const elapsedTimeDisplay = document.getElementById("elapsedTime");
+        const slider = document.getElementById("slider");
+        const sliderValue = document.getElementById("sliderValue");
+
+        let resultsData = [];
+
+        slider.addEventListener("input", () => {
+            const threshold = slider.value;
+            sliderValue.textContent = `${threshold}%`;
+            updateHighlights(threshold);
+        });
+
+        async function fetchSimilarity() {
+            let startTime = Date.now();
+
+            // Show the loading screen
+            loadingScreen.classList.add("active");
+
+            // Update elapsed time live
+            const timer = setInterval(() => {
+                const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
+                elapsedTimeDisplay.textContent = `Time elapsed: ${elapsedTime} seconds`;
+            }, 100);
+
+            try {
+                // Fetch similarity results
+                const processResponse = await fetch("/process-similarity", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ least_plagiarism: 30.0 }),
+                });
+
+                const processData = await processResponse.json();
+                resultsData = processData.results;
+
+                // Clear the timer
+                clearInterval(timer);
+
+                // Hide loading screen
+                loadingScreen.classList.remove("active");
+
+                // Display results
+                renderResults(resultsData);
+            } catch (error) {
+                // Clear the timer
+                clearInterval(timer);
+
+                // Hide loading screen
+                loadingScreen.classList.remove("active");
+
+                // Show error message
+                resultsDiv.innerHTML = `
+          <p class="text-red-500 font-medium text-center">An error occurred: ${error.message}</p>
+        `;
+            }
+        }
+
+        function renderResults(results) {
+            resultsDiv.innerHTML = `
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Results</h2>
+                <ul class="space-y-4">
+                ${results.map(result => `
+                    <li class="result-item flex justify-between items-center bg-gray-50 p-4 rounded-lg shadow-md break-words" 
+                        data-score="${result.score}" 
+                        data-program1="${result.program1}" 
+                        data-program2="${result.program2}">
+                    <div>
+                        <p><span class="font-semibold">${result.program1}</span> x <span class="font-semibold">${result.program2}</span></p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="highlight-button text-white px-3 py-1 rounded-lg hover:bg-red-400">
+                        <p class="text-sm text-gray-700">Similarity: <span class="score text-sm text-gray-800 font-bold">${result.score.toFixed(2)}%</span></p>
+                        </button>
+                    </div>
+                    </li>
+                `).join('')}
+                </ul>
+            `;
+
+            // Attach click handlers to buttons
+            const buttons = document.querySelectorAll('.highlight-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', handleButtonClick);
+            });
+
+            // Apply the initial slider threshold
+            updateHighlights(slider.value);
+        }
+
+    async function handleButtonClick(event) {
+        const liElement = event.target.closest('.result-item');
+        const program1 = liElement.dataset.program1;
+        const program2 = liElement.dataset.program2;
+
+        try {
+            const response = await fetch('/compare', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ program1, program2 }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (data.message === "Comparison completed successfully") {
+                const link = document.createElement('a');
+                link.href = '/static/result.pdf';
+                link.download = 'result.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('Comparison did not complete successfully.');
+            }
+        } catch (error) {
+            console.error('Download failed:', error);
+            alert('An error occurred while downloading the file.');
+        }
+    }
+
+
+        function updateHighlights(threshold) {
+            const resultItems = document.querySelectorAll(".result-item");
+            resultItems.forEach((item) => {
+                const score = parseFloat(item.dataset.score);
+                const scoreElement = item.querySelector(".score");
+                if (score >= threshold) {
+                    item.classList.add("highlight");
+                    scoreElement.classList.add("highlight");
+                } else {
+                    item.classList.remove("highlight");
+                    scoreElement.classList.remove("highlight");
+                }
+            });
+        }
+
+        // Automatically call fetchSimilarity on page load
+        fetchSimilarity();
+    </script>
+</body>
+
+</html>

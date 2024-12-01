@@ -5,8 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plagiarism Report</title>
-    <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}" />
-    <link rel="icon" href="{{url_for('static', filename='images/Loading.png')}}" type="image/x-icon" />
+    <link rel="stylesheet" href="/static/dist/css/output.css" />
+    <link rel="icon" href="/static/images/Loading.png" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
 </head>
 <body>
     <nav class="bg-white border-gray-200 shadow-md shadow-gray-600">
@@ -29,38 +30,40 @@
         <h1 class="text-center text-4xl font-bold text-teal-800 mt-6 mb-12">
             Compare Results
         </h1>
-        <div class="container">{{ html_output|safe }}</div>
     </section>
 
     <section class="max-w-6xl mx-auto p-8">
-    <!-- Grid Upload Boxes -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Image Persentase -->
-        <div class="p-5 flex flex-col items-center justify-center gap-3">
-            <img src="/static/images/Persen.png" alt="Image 4" class="w-[250px]" />
-        </div>
-        <!-- Result Plagiarism -->
-        <div class="flex flex-col justify-between">
-            <p class="text-gray-700 mb-8 text-lg">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                aliquip ex ea commodo consequat. Duis aute irure dolor in
-                reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                pariatur. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
-
-            <!-- Download Button -->
-            <div class="flex justify-center">
-                <button
-                    class="bg-gradient-to-r from-deep-blue to-light-blue text-white font-bold py-3 px-6 rounded-lg hover:from-teal-500 hover:to-teal-700 transition-all duration-300">
-                    Download PDF
-                </button>
+        <!-- Grid Upload Boxes -->
+        <iframe src="/dashboard/similarity" class="w-full h-lvh border-0"></iframe>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+            <!-- Image Persentase -->
+            <div class="p-5 flex flex-col items-center justify-center gap-3">
+                <img src="/static/images/Persen.png" alt="Image 4" class="w-[250px]" />
+            </div>
+            
+            <!-- Result Plagiarism -->
+            <div class="flex flex-col justify-between">
+                <p class="text-gray-700 mb-8 text-lg">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                    minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                    aliquip ex ea commodo consequat. Duis aute irure dolor in
+                    reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                    pariatur. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                    laboris nisi ut aliquip ex ea commodo consequat.
+                </p>
+    
+                <!-- Download Button -->
+                <div class="flex justify-center">
+                    <button
+                        class="bg-gradient-to-r from-deep-blue to-light-blue text-white font-bold py-3 px-6 rounded-lg hover:from-teal-500 hover:to-teal-700 transition-all duration-300">
+                        Download PDF
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-</section>
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+        <iframe src="/dashboard/check-ai" class="w-full h-lvh border-0"></iframe>
+    </section>
+
 </body>
 </html>
