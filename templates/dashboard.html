@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PlagiTrack</title>
+    <script src="/static/js/script.js"></script>
     <link rel="stylesheet" href="/static/dist/css/output.css" />
     <link rel="icon" href="/static/images/Loading.png" type="image/x-icon" />
     <style>
@@ -38,7 +39,7 @@
             <div
                 class="border-2 border-deep-blue rounded-lg p-6 flex flex-col items-center justify-center shadow-md text-center">
                 <img src="/static/images/File.png" alt="File Icon" class="h-14 mb-4" />
-                <div class="text-deep-blue font-bold text-center">{{ file[-30:].strip() }}</div>
+                <div class="text-deep-blue font-bold text-center">{{ file }}</div>
             </div>
             {% endfor %}
         </div>
@@ -80,8 +81,6 @@
         </div>
         {% endif %}
     </section>
-
-    <script src="/static/js/script.js"></script>
 </body>
 
 </html>

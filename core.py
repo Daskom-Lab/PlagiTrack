@@ -3,6 +3,11 @@ from thefuzz import fuzz as tf
 from rapidfuzz import fuzz as rf
 from aiohttp import web
 from glob import glob
+from copydetect import CopyDetector
+import numpy as np
+import json
+from jinja2 import Template
+
 
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'output'
@@ -15,6 +20,9 @@ ALLOWED_EXTENSIONS = {'c'}
 # k <= 0:     Inverts the percentage values, NOT SUITABLE!
 # Recommended ranges: 0.7 up to 0.9
 # Recommended value for `least_plagiarism`: 30%
+TF_FACTOR = 1
+LEAST_PLG = 30.0
+
 
 
 def allowed_file(filename):
@@ -245,3 +253,33 @@ def process_ai_detection(request):
 
     return web.json_response(payload)
 
+class CustomDetector(CopyDetector):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def my_html(self, output_mode="save"):
+        if len(self.similarity_matrix) == 0:
+            return
+
+        code_list = self.get_copied_code_list()
+        scores=self.similarity_matrix[:,:,0][self.similarity_matrix[:,:,0]!=-1]
+        
+        # render template with jinja and save as html
+        with open("templates/report.html", encoding="utf-8") as template_fp:
+            template = Template(template_fp.read())
+
+        flagged = self.similarity_matrix[:,:,0] > self.conf.display_t
+        flagged_file_count = np.sum(np.any(flagged, axis=1))
+
+        formatted_conf = json.dumps(self.conf.to_json(), indent=4)
+        output = template.render(config_params=formatted_conf,
+                                 version=1.0,
+                                 test_count=len(self.test_files),
+                                 test_files=self.test_files,
+                                 compare_count=len(self.ref_files),
+                                 compare_files=self.ref_files,
+                                 flagged_file_count=flagged_file_count,
+                                 code_list=code_list)
+
+        with open('static/result.html', "w", encoding="utf-8") as report_f:
+            report_f.write(output)

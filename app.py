@@ -6,8 +6,7 @@ import jinja2
 import os
 import shutil
 from glob import glob
-from core import allowed_file, process_ai_detection, process_similarity, UPLOAD_FOLDER, STATIC_FOLDER, OUTPUT_FOLDER
-from copydetect import CopyDetector
+from core import allowed_file, process_ai_detection, process_similarity, UPLOAD_FOLDER, STATIC_FOLDER, OUTPUT_FOLDER, CustomDetector, LEAST_PLG, TF_FACTOR
 import pdfkit
 import re
 
@@ -62,8 +61,8 @@ async def similarity(request):
 async def handle_similarity(request):
     data = await request.json()
     programs = glob(UPLOAD_FOLDER+'/*.c')
-    transformation_factor = data.get("transformation_factor", 1)
-    least_plagiarism = data.get("least_plagiarism", 30.0)
+    transformation_factor = .get("transformation_factor", TF_FACTOR)
+    least_plagiarism = data.get("least_plagiarism", LEAST_PLG)
 
     # Run CPU-intensive task in ProcessPoolExecutor
     loop = asyncio.get_event_loop()
@@ -105,35 +104,25 @@ async def handle_compare(request):
         shutil.copy(program2_path, OUTPUT_FOLDER)
 
         # Initialize the detector
-        detector = CopyDetector(test_dirs=[OUTPUT_FOLDER], extensions=['c'], out_file=html_path, autoopen=False)
+        detector = CustomDetector(test_dirs=[OUTPUT_FOLDER], extensions=['c'], out_file=html_path, autoopen=False)
 
         # Use an executor for blocking operations
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, detector.run)
+        await loop.run_in_executor(executor, detector.run)
+        await loop.run_in_executor(executor, detector.generate_html_report)
+        # detector.run()
+        # detector.my_html()
 
-        # TODO custom generate html report so it works with pdfkit
-        await loop.run_in_executor(None, detector.generate_html_report)
-
+        await loop.run_in_executor(executor, lambda: pdfkit.from_file(html_path, pdf_path))
+        # pdfkit.from_file(html_path, pdf_path)
+        
         shutil.rmtree(OUTPUT_FOLDER)
-
-        # Generate the PDF
-        with open(html_path, 'r') as file:
-            html_content = file.read()
-
-        # Replace "collapse" with ""
-        html_content = html_content.replace("collapse", "")
-
-        # Remove all button tags
-        html_content = re.sub(r'<button.*?>.*?</button>', '', html_content, flags=re.DOTALL)
-
-        with open(html_path, 'w') as file:
-            file.write(html_content)
-        await loop.run_in_executor(None, lambda: pdfkit.from_file(html_path, pdf_path))
 
         # Return the PDF as a response
         return web.json_response({"message": "Comparison completed successfully"}, status=200)
 
     except Exception as e:
+        print(e)
         return web.json_response({"error": f"An error occurred: {str(e)}"}, status=500)
 
 
@@ -155,7 +144,7 @@ def setup_routes(app):
 
 # App Setup
 app = web.Application()
-executor = ProcessPoolExecutor()
+executor = ProcessPoolExecutor(max_workers=8)
 
 # Configure Jinja2 Template Engine
 aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
