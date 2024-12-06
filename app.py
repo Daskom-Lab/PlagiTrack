@@ -23,10 +23,11 @@ async def dashboard(request):
 
 async def upload_files(request):
     reader = await request.multipart()
-    files = []
     async for field in reader:
         filename = field.filename
         if filename and allowed_file(filename):
+            # Sanitize
+            filename = os.path.basename(filename)
             filepath = os.path.join(UPLOAD_FOLDER, filename)
             with open(filepath, 'wb') as f:
                 while True:
@@ -34,7 +35,6 @@ async def upload_files(request):
                     if not chunk:
                         break
                     f.write(chunk)
-            files.append(filename)
     return web.HTTPFound(location='/dashboard')
 
 async def delete_files(request):
