@@ -1,3 +1,4 @@
+import skia
 import os
 from thefuzz import fuzz as tf
 from rapidfuzz import fuzz as rf
@@ -285,6 +286,99 @@ class CustomDetector(CopyDetector):
         with open('static/result.html', "w", encoding="utf-8") as report_f:
             report_f.write(output)
 
+def generate_pdf_file(pdf_file, config_params, version, test_count, compare_count, code_list):
+    stream = skia.FILEWStream(pdf_file)
+    with skia.PDF.MakeDocument(stream) as document:
+        # A4 page size
+        A4_WIDTH = 595
+        A4_HEIGHT = 842
+
+        # Function to draw text with wrapping
+        def draw_wrapped_text(canvas, text, x, y, max_width, paint, font):
+            lines = []
+            current_line = ""
+            words = text.split()
+            for word in words:
+                test_line = f"{current_line} {word}".strip()
+                if font.measureText(test_line) <= max_width:
+                    current_line = test_line
+                else:
+                    lines.append(current_line)
+                    current_line = word
+            lines.append(current_line)
+
+            # Draw each line
+            line_height = font.getSpacing()
+            for line in lines:
+                canvas.drawString(line, x, y, font, paint)
+                y += line_height
+
+        # Render each page
+        with document.page(A4_WIDTH, A4_HEIGHT) as canvas:
+            # Setup font and paint
+            header_font = skia.Font(skia.Typeface('Arial'), 16)
+            text_font = skia.Font(skia.Typeface('Arial'), 12)
+            text_paint = skia.Paint(AntiAlias=True, Color=skia.ColorBLACK)
+
+            # Margins and positions
+            margin = 50
+            line_y = margin
+
+            # Render header
+            canvas.drawString("Matched Code Report", margin, line_y, header_font, text_paint)
+            line_y += 30
+
+            # Render configuration and version
+            draw_wrapped_text(
+                canvas,
+                f"Configuration Parameters: {config_params}",
+                margin,
+                line_y,
+                A4_WIDTH - 2 * margin,
+                text_paint,
+                text_font,
+            )
+            line_y += 20
+            canvas.drawString(f"Version: {version}", margin, line_y, text_font, text_paint)
+            line_y += 20
+            canvas.drawString(f"Test Files Count: {test_count}", margin, line_y, text_font, text_paint)
+            line_y += 20
+            canvas.drawString(f"Comparison Files Count: {compare_count}", margin, line_y, text_font, text_paint)
+            line_y += 30
+
+            # Render code list
+            for index, code in enumerate(code_list, start=1):
+                if line_y > A4_HEIGHT - margin:  # Start a new page if out of space
+                    line_y = margin
+                    with document.page(A4_WIDTH, A4_HEIGHT) as canvas:
+                        pass
+
+                # Render each code comparison
+                canvas.drawString(
+                    f"Test File: {code[2]} ({code[0]*100:.2f}%)", margin, line_y, text_font, text_paint
+                )
+                line_y += 20
+                canvas.drawString(
+                    f"Reference File: {code[3]} ({code[1]*100:.2f}%)", margin, line_y, text_font, text_paint
+                )
+                line_y += 20
+                canvas.drawString(f"Token Overlap: {code[6]}", margin, line_y, text_font, text_paint)
+                line_y += 20
+
+                # Matched code columns
+                canvas.drawString("Matched Code (Test):", margin, line_y, text_font, text_paint)
+                canvas.drawString("Matched Code (Reference):", A4_WIDTH // 2, line_y, text_font, text_paint)
+                line_y += 20
+                draw_wrapped_text(
+                    canvas, code[4], margin, line_y, (A4_WIDTH // 2) - margin, text_paint, text_font
+                )
+                draw_wrapped_text(
+                    canvas, code[5], A4_WIDTH // 2, line_y, (A4_WIDTH // 2) - margin, text_paint, text_font
+                )
+                line_y += 50
+
+    print(f"PDF saved to {pdf_file}")
+
 def compare(program1, program2):
     pdf_path = 'static' + '/result.pdf'
     html_path = 'static' + '/result.html'
@@ -309,6 +403,9 @@ def compare(program1, program2):
     detector = CustomDetector(test_dirs=[OUTPUT_FOLDER], extensions=['c'], out_file=html_path, autoopen=False)
     detector.run()
     detector.my_html()
+    # code_list = detector.get_copied_code_list()
+    # formatted_conf = json.dumps(detector.conf.to_json(), indent=4)
+    # generate_pdf_file('static/result.pdf', formatted_conf, 1.0, len(detector.test_files), len(detector.ref_files), code_list)
 
     pdfkit.from_file(html_path, pdf_path)
 
