@@ -6,9 +6,7 @@ import jinja2
 import os
 import shutil
 from glob import glob
-from core import allowed_file, process_ai_detection, process_similarity, UPLOAD_FOLDER, STATIC_FOLDER, OUTPUT_FOLDER, CustomDetector, LEAST_PLG, TF_FACTOR
-import pdfkit
-import re
+from core import allowed_file, compare, process_ai_detection, process_similarity, UPLOAD_FOLDER, STATIC_FOLDER, LEAST_PLG, TF_FACTOR
 
 # Route Handlers
 @aiohttp_jinja2.template('index.html')
@@ -61,7 +59,7 @@ async def similarity(request):
 async def handle_similarity(request):
     data = await request.json()
     programs = glob(UPLOAD_FOLDER+'/*.c')
-    transformation_factor = .get("transformation_factor", TF_FACTOR)
+    transformation_factor = data.get("transformation_factor", TF_FACTOR)
     least_plagiarism = data.get("least_plagiarism", LEAST_PLG)
 
     # Run CPU-intensive task in ProcessPoolExecutor
@@ -76,16 +74,6 @@ async def handle_compare(request):
     Handles the POST request to compare two programs.
     """
     try:
-        pdf_path = 'static' + '/result.pdf'
-        html_path = 'static' + '/result.html'
-
-        if os.path.exists(pdf_path):
-            os.remove(pdf_path)
-        if os.path.exists(html_path):
-            os.remove(html_path)
-        os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-
-        # Parse the incoming JSON payload
         data = await request.json()
         program1 = data.get("program1")
         program2 = data.get("program2")
@@ -94,29 +82,8 @@ async def handle_compare(request):
         if not program1 or not program2:
             return web.json_response({"error": "Both program1 and program2 are required"}, status=400)
 
-        # Remove any existing .c files in the OUTPUT_FOLDER
-        for file in glob(OUTPUT_FOLDER + '/*.c'):
-            os.remove(file)
-
-        program1_path = UPLOAD_FOLDER + '/' + program1
-        program2_path = UPLOAD_FOLDER + '/' + program2
-        shutil.copy(program1_path, OUTPUT_FOLDER)
-        shutil.copy(program2_path, OUTPUT_FOLDER)
-
-        # Initialize the detector
-        detector = CustomDetector(test_dirs=[OUTPUT_FOLDER], extensions=['c'], out_file=html_path, autoopen=False)
-
-        # Use an executor for blocking operations
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(executor, detector.run)
-        await loop.run_in_executor(executor, detector.generate_html_report)
-        # detector.run()
-        # detector.my_html()
-
-        await loop.run_in_executor(executor, lambda: pdfkit.from_file(html_path, pdf_path))
-        # pdfkit.from_file(html_path, pdf_path)
-        
-        shutil.rmtree(OUTPUT_FOLDER)
+        await loop.run_in_executor(executor, compare, program1, program2)
 
         # Return the PDF as a response
         return web.json_response({"message": "Comparison completed successfully"}, status=200)

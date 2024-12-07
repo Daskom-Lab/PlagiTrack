@@ -7,7 +7,8 @@ from copydetect import CopyDetector
 import numpy as np
 import json
 from jinja2 import Template
-
+import pdfkit
+import shutil
 
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'output'
@@ -283,3 +284,33 @@ class CustomDetector(CopyDetector):
 
         with open('static/result.html', "w", encoding="utf-8") as report_f:
             report_f.write(output)
+
+def compare(program1, program2):
+    pdf_path = 'static' + '/result.pdf'
+    html_path = 'static' + '/result.html'
+
+    if os.path.exists(pdf_path):
+        os.remove(pdf_path)
+    if os.path.exists(html_path):
+        os.remove(html_path)
+    
+    os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+    # Remove any existing .c files in the OUTPUT_FOLDER
+    for file in glob(OUTPUT_FOLDER + '/*.c'):
+        os.remove(file)
+
+    program1_path = UPLOAD_FOLDER + '/' + program1
+    program2_path = UPLOAD_FOLDER + '/' + program2
+    os.system(f'cp "{program1_path}" "{OUTPUT_FOLDER}"')
+    os.system(f'cp "{program2_path}" "{OUTPUT_FOLDER}"')
+
+    # Initialize the detector
+    detector = CustomDetector(test_dirs=[OUTPUT_FOLDER], extensions=['c'], out_file=html_path, autoopen=False)
+    detector.run()
+    detector.my_html()
+
+    pdfkit.from_file(html_path, pdf_path)
+
+    if os.path.exists(OUTPUT_FOLDER):
+        shutil.rmtree(OUTPUT_FOLDER)

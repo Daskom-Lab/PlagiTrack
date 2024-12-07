@@ -4,42 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Uncommon Functions Report</title>
-  <link rel="stylesheet" href="/static/dist/css/output.css" />
-  <link rel="icon" href="/static/images/Loading.png" type="image/x-icon" />
-  <style>
-    .sortable {
-      position: relative;
-    }
-    .sortable::after {
-      content: '';
-      position: absolute;
-      right: 10px;
-      color: #555;
-    }
-    .sortable[data-sort="asc"]::after {
-      content: '▲';
-    }
-    .sortable[data-sort="desc"]::after {
-      content: '▼';
-    }
-    .sortable.active {
-      text-decoration: underline;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body class="bg-gray-100 text-gray-800">
-  <div class="max-w-5xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Uncommon Functions Report</h1>
-    
-    <!-- Summary Table Placeholder -->
-    <div id="summary-container" class="mb-6"></div>
-
-    <!-- Detailed Report Container -->
-    <div id="report-container"></div>
-  </div>
-
-  <script>
+  <script defer>
     let currentSortColumn = 'foundCount'; // Default sort column
     let currentSortDirection = 'desc'; // Default sort direction
 
@@ -222,5 +187,39 @@
     // Fetch and render data when the DOM is fully loaded
     document.addEventListener('DOMContentLoaded', fetchData);
   </script>
+  <link rel="stylesheet" href="/static/dist/css/output.css" />
+  <link rel="icon" href="/static/images/Loading.png" type="image/x-icon" />
+  <style>
+    .sortable {
+      position: relative;
+    }
+    .sortable::after {
+      content: '';
+      position: absolute;
+      right: 10px;
+      color: #555;
+    }
+    .sortable[data-sort="asc"]::after {
+      content: '▲';
+    }
+    .sortable[data-sort="desc"]::after {
+      content: '▼';
+    }
+    .sortable.active {
+      text-decoration: underline;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Uncommon Functions Report</h1>
+    
+    <!-- Summary Table Placeholder -->
+    <div id="summary-container" class="mb-6"></div>
+
+    <!-- Detailed Report Container -->
+    <div id="report-container"></div>
+  </div>
 </body>
 </html>
