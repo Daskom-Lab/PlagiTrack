@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Copy Detection Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-kQtW33rZJAHjgefvhyyzcGF3C5TFyBQBA13V1RKPf4uH+bwyzQxZ6CmMZHmNBEfJ" crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF" crossorigin="anonymous">
+  <style>
+    h1 {
+      text-align: center;
+    }
+    .highlight-green {
+      background-color: #b6f2b6;
+    }
+    .highlight-red {
+      background-color: #f2b6b6;
+    }
+    pre {
+      text-align: left;
+    }
+    .col3 {
+      float: left;
+      width: 33%;
+    }
+    .file-info-list {
+      max-height: 900px;
+      overflow-y: scroll;
+    }
+    .main-report-div {
+      margin-top: 3em;
+      max-width: 1400px;
+    }
+    .code-display {
+      max-width: 600px
+    }
+  </style>
+</head>
+<body>
+<div class="container main-report-div">
+  <h1 style="margin-bottom: 1em;">Copy Detection Report</h1>
+  <h2>Overview</h2>
+    <div class="row" style="font-size: small;">
+      <div class="col3">
+        <p>
+          <b>Number of files tested (vertical):</b> {{ test_count }}<br>
+          <b>Number above display threshold:</b> {{ flagged_file_count }} ({{ "%.2f"|format(flagged_file_count/test_count*100) }}%)<br><br>
+          <button class="btn btn-secondary" type="button" data-bs-toggle="" data-bs-target="#collapse-test-files" aria-expanded="false" aria-controls="collapse-test-files">
+            View <i>test</i> files
+          </button>
+        </p>
+        <div id="collapse-test-files">
+          <ul class="file-info-list">
+            {%- for file in test_files %}
+              <li>{{ loop.index0 }}={{ file }}</li> 
+            {% endfor -%}
+          </ul>
+        </div>
+      </div>
+      <div class="col3">
+        <p>
+          <b>Number of reference files (horizontal):</b> {{ compare_count }}<br><br><br>
+          <button class="btn btn-secondary" type="button" data-bs-toggle="" data-bs-target="#collapse-reference-files" aria-expanded="false" aria-controls="collapse-reference-files">
+            View <i>reference</i> files
+          </button>
+        </p>
+        <div id="collapse-reference-files">
+          <ul class="file-info-list">
+            {%- for file in compare_files %}
+              <li>{{ loop.index0 }}={{ file }}</li> 
+            {% endfor -%}
+          </ul>
+        </div>
+      </div>
+      <div class="col3">
+        <p>
+          <b>Execution params (see <code>copydetect --help</code>):</b><br><br><br>
+          <button class="btn btn-secondary" type="button" data-bs-toggle="" data-bs-target="#collapse-exec-params" aria-expanded="false" aria-controls="collapse-exec-params">
+            View execution parameters
+          </button>
+        </p>
+        <div id="collapse-exec-params">
+          <b>version:</b> {{ version }}<br>
+          <b>Configuration:</b>
+          <pre class="file-info-list">{{config_params}}</pre>
+        </div>
+      </div>
+    </div>
+
+
+  <h2>Matched Code</h2>
+  <table class="table table-striped table-sm">
+  <tbody class="table-light">
+  {% for code in code_list %}
+  <tr>
+  <td style="text-align: center;">
+  <p>
+    Test file: <i>{{ code[2]|e }}</i> (<b>{{ "%.2f"|format(code[0]*100) }}%</b>)<br>
+    Reference file: <i>{{ code[3]|e }}</i> (<b>{{ "%.2f"|format(code[1]*100) }}%</b>)<br>
+    Token overlap: {{ code[6] }}<br><br>
+    <button class="btn btn-secondary" type="button" data-bs-toggle="" data-bs-target="#collapse-{{loop.index}}" aria-expanded="false" aria-controls="collapse-{{loop.index}}">
+      View matched code
+    </button>
+  </p>
+  <div id="collapse-{{loop.index}}">
+    <div class="card card-body">
+      <div class="row">
+        <div class="col code-display">
+          <pre><code>{{ code[4] }}</code></pre>
+        </div>
+        <div class="col code-display">
+          <pre><code>{{ code[5] }}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+</div>
+</body>
