@@ -1,3 +1,5 @@
 thefuzz
 rapidfuzz
 copydetect
+aiohttp
+pdfkit

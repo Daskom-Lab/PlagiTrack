@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uncommon Functions Report</title>
+  <script defer>
+    let currentSortColumn = 'foundCount'; // Default sort column
+    let currentSortDirection = 'desc'; // Default sort direction
+
+    /**
+     * Fetch data from the server and render the report.
+     */
+    async function fetchData() {
+      try {
+        const response = await fetch('/process-ai-detection'); // Adjust endpoint as necessary
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        renderSummaryTable(data.programs);
+        renderDetailedReport(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        document.getElementById('report-container').innerText = 'Error loading data. Please try again later.';
+      }
+    }
+
+    /**
+     * Render the summary table by files with sorting functionality.
+     * @param {Array} programs - The array of program data.
+     */
+    function renderSummaryTable(programs) {
+      // Sort programs by the default column and direction
+      programs.sort((a, b) => {
+        const aValue = a.categories.reduce((sum, category) => sum + category.found_count, 0);
+        const bValue = b.categories.reduce((sum, category) => sum + category.found_count, 0);
+        return currentSortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      });
+
+      const summaryContainer = document.getElementById('summary-container');
+      summaryContainer.innerHTML = ''; // Clear existing content
+
+      const summaryTable = document.createElement('table');
+      summaryTable.classList.add('min-w-full', 'bg-white', 'shadow-md', 'rounded-lg', 'mb-6');
+
+      const thead = document.createElement('thead');
+      thead.classList.add('bg-gray-200');
+      thead.innerHTML = `
+        <tr>
+          <th class="py-2 px-4 border-b cursor-pointer sortable" data-column="filename">File</th>
+          <th class="py-2 px-4 border-b cursor-pointer sortable" data-column="lines">Total Lines</th>
+          <th class="py-2 px-4 border-b cursor-pointer sortable" data-column="foundCount" data-sort="${currentSortDirection}">Total Found</th>
+          <th class="py-2 px-4 border-b cursor-pointer sortable" data-column="targets">Targets</th>
+        </tr>
+      `;
+      thead.addEventListener('click', event => handleSort(event, programs));
+      summaryTable.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      programs.forEach(program => {
+        const tr = document.createElement('tr');
+        const totalFound = program.categories.reduce((sum, category) => sum + category.found_count, 0);
+        const allTargets = Array.from(
+          new Set(program.categories.flatMap(category => category.found_targets))
+        );
+
+        tr.innerHTML = `
+          <td class="py-2 px-4 border-b">${program.filename}</td>
+          <td class="py-2 px-4 border-b">${program.lines}</td>
+          <td class="py-2 px-4 border-b">${totalFound}</td>
+          <td class="py-2 px-4 border-b">${allTargets.join(', ')}</td>
+        `;
+        tbody.appendChild(tr);
+
+        // Attach metadata for sorting
+        tr.dataset.filename = program.filename.toLowerCase();
+        tr.dataset.lines = program.lines;
+        tr.dataset.foundCount = totalFound;
+        tr.dataset.targets = allTargets.length;
+      });
+      summaryTable.appendChild(tbody);
+      summaryContainer.appendChild(summaryTable);
+
+      // Highlight default sorted column
+      const defaultHeader = thead.querySelector(`[data-column="${currentSortColumn}"]`);
+      defaultHeader.classList.add('active');
+    }
+
+    /**
+     * Handle column sorting when clicking the header.
+     * @param {Event} event - The click event.
+     * @param {Array} programs - The array of program data.
+     */
+    function handleSort(event, programs) {
+      const column = event.target.dataset.column;
+      if (!column) return;
+
+      const thead = document.querySelector('#summary-container thead');
+      const tbody = document.querySelector('#summary-container tbody');
+      const rows = Array.from(tbody.children);
+
+      // Clear previous sort indicators
+      Array.from(thead.querySelectorAll('.sortable')).forEach(header => {
+        header.classList.remove('active');
+        header.removeAttribute('data-sort');
+      });
+
+      if (currentSortColumn === column) {
+        // Toggle sorting direction
+        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        // Set new column and default to ascending
+        currentSortColumn = column;
+        currentSortDirection = 'asc';
+      }
+
+      // Add active class and sort direction to the current column
+      const activeHeader = thead.querySelector(`[data-column="${column}"]`);
+      activeHeader.classList.add('active');
+      activeHeader.dataset.sort = currentSortDirection;
+
+      // Perform the sorting
+      rows.sort((a, b) => {
+        let aValue = a.dataset[column];
+        let bValue = b.dataset[column];
+
+        // Convert to numbers if the column is numeric
+        if (['lines', 'foundCount', 'targets'].includes(column)) {
+          aValue = parseInt(aValue, 10);
+          bValue = parseInt(bValue, 10);
+        }
+
+        if (aValue < bValue) return currentSortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return currentSortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      // Re-render the sorted rows
+      tbody.innerHTML = '';
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    /**
+     * Render the detailed report organized by files.
+     * @param {Object} data - The data returned from the server.
+     */
+    function renderDetailedReport(data) {
+      const container = document.getElementById('report-container');
+      container.innerHTML = ''; // Clear existing content
+
+      data.programs.forEach(program => {
+        const programDiv = document.createElement('div');
+        programDiv.classList.add('mb-6', 'bg-white', 'shadow-md', 'p-4', 'rounded-lg');
+
+        programDiv.innerHTML = `
+          <h2 class="text-xl font-semibold mb-4 text-gray-800">
+            ${program.filename} - <span class="text-teal-400">${program.lines}</span> lines
+          </h2>
+        `;
+
+        program.categories.forEach(category => {
+          const details = document.createElement('details');
+          details.classList.add('bg-gray-50', 'p-4', 'rounded-lg', 'shadow-sm', 'hover:shadow-md', 'transition-shadow', 'my-2');
+
+          details.innerHTML = `
+            <summary class="cursor-pointer text-md font-medium text-teal-700 hover:text-teal-600">
+              <span class="text-gray-800">${category.title}</span> - Found ${category.found_count} - 
+              <span class="text-gray-700 font-normal"><mark>${category.found_targets.join('</mark>, <mark>')}</mark></span>
+            </summary>
+            <div class="mt-2">
+              <h4 class="text-md font-semibold text-gray-800">Found:</h4>
+              <ul class="list-disc pl-6 text-gray-700">
+                ${category.found_items.map(item => `
+                  <li class="mb-1"><code>[${item.line}] ${item.snippet.replace(item.highlight, `<mark>${item.highlight}</mark>`)}</code></li>
+                `).join('')}
+              </ul>
+            </div>
+          `;
+          programDiv.appendChild(details);
+        });
+
+        container.appendChild(programDiv);
+      });
+    }
+
+    // Fetch and render data when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', fetchData);
+  </script>
+  <link rel="stylesheet" href="/static/dist/css/output.css" />
+  <link rel="icon" href="/static/images/Loading.png" type="image/x-icon" />
+  <style>
+    .sortable {
+      position: relative;
+    }
+    .sortable::after {
+      content: '';
+      position: absolute;
+      right: 10px;
+      color: #555;
+    }
+    .sortable[data-sort="asc"]::after {
+      content: '▲';
+    }
+    .sortable[data-sort="desc"]::after {
+      content: '▼';
+    }
+    .sortable.active {
+      text-decoration: underline;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Uncommon Functions Report</h1>
+    
+    <!-- Summary Table Placeholder -->
+    <div id="summary-container" class="mb-6"></div>
+
+    <!-- Detailed Report Container -->
+    <div id="report-container"></div>
+  </div>
+</body>
+</html>
